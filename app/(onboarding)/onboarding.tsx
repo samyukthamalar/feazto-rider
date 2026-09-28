@@ -4,17 +4,16 @@
  * "Shows success message after verification."
  */
 
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { PrimaryButton } from '../../src/components/common/PrimaryButton';
-import { WorkflowBar } from '../../src/components/common/WorkflowBar';
-import { colors } from '../../src/constants/colors';
-import { spacing } from '../../src/constants/spacing';
-import { typography } from '../../src/constants/typography';
-import { useAuthStore } from '../../src/store/authStore';
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { PrimaryButton } from "../../src/components/common/PrimaryButton";
+import { WorkflowBar } from "../../src/components/common/WorkflowBar";
+import { colors } from "../../src/constants/colors";
+import { spacing } from "../../src/constants/spacing";
+import { typography } from "../../src/constants/typography";
+import { useAuthStore } from "../../src/store/authStore";
 
 export default function OnboardingScreen() {
   const router = useRouter();
@@ -22,7 +21,7 @@ export default function OnboardingScreen() {
 
   const handleGetStarted = () => {
     setIsOnboarded(true);
-    router.replace('/(tabs)' as any);
+    router.replace("/(tabs)" as any);
   };
 
   return (
@@ -44,7 +43,7 @@ export default function OnboardingScreen() {
           {/* Welcome Text */}
           <Text style={styles.title}>Welcome, Rider!</Text>
           <Text style={styles.subtitle}>
-            You're all set to start delivering.
+            You&apos;re all set to start delivering.
           </Text>
         </View>
 
@@ -67,71 +66,71 @@ export default function OnboardingScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
   },
   container: {
     flex: 1,
     paddingHorizontal: 24,
     paddingBottom: 24,
-    justifyContent: 'space-between',
-    backgroundColor: '#FFFFFF',
+    justifyContent: "space-between",
+    backgroundColor: "#FFFFFF",
   },
   centerContent: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    alignItems: "center",
+    justifyContent: "center",
   },
   avatarWrapper: {
-    position: 'relative',
+    position: "relative",
     marginBottom: spacing.xl,
   },
   avatarCircle: {
     width: 104,
     height: 104,
     borderRadius: 52,
-    backgroundColor: '#F1F5F9',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#F1F5F9",
+    alignItems: "center",
+    justifyContent: "center",
     borderWidth: 3,
-    borderColor: '#E2E8F0',
+    borderColor: "#E2E8F0",
   },
   badgeCircle: {
-    position: 'absolute',
+    position: "absolute",
     bottom: 2,
     right: 2,
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: '#10B981',
+    backgroundColor: "#10B981",
     borderWidth: 2,
-    borderColor: '#FFFFFF',
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderColor: "#FFFFFF",
+    alignItems: "center",
+    justifyContent: "center",
   },
   title: {
     ...typography.h2,
     fontSize: 26,
-    fontWeight: '800',
-    color: '#111827',
-    textAlign: 'center',
+    fontWeight: "800",
+    color: "#111827",
+    textAlign: "center",
   },
   subtitle: {
     ...typography.body1,
     color: colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 8,
   },
   footer: {
-    width: '100%',
-    alignItems: 'center',
+    width: "100%",
+    alignItems: "center",
     gap: 12,
   },
   startBtn: {
-    width: '100%',
+    width: "100%",
   },
   captionText: {
     ...typography.caption,
     color: colors.textMuted,
-    textAlign: 'center',
+    textAlign: "center",
   },
 });

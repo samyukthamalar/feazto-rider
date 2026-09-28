@@ -3,13 +3,13 @@
  * Source of truth: FEAzTO Rider Master Prompt Section 5, 6, 10, 28
  */
 
-import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
-import { colors } from '../../constants/colors';
-import { spacing } from '../../constants/spacing';
-import { typography } from '../../constants/typography';
-import { Card } from './Card';
-import { PrimaryButton } from './PrimaryButton';
+import React from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { colors } from "../../constants/colors";
+import { spacing } from "../../constants/spacing";
+import { typography } from "../../constants/typography";
+import { Card } from "./Card";
+import { PrimaryButton } from "./PrimaryButton";
 
 interface EarningsCardProps {
   todayTotal: number;
@@ -41,7 +41,7 @@ export const EarningsCard: React.FC<EarningsCardProps> = ({
       {/* Top Header */}
       <View style={styles.header}>
         <View>
-          <Text style={styles.tag}>TODAY'S ACCUMULATED EARNINGS</Text>
+          <Text style={styles.tag}>TODAY&apos;S ACCUMULATED EARNINGS</Text>
           <Text style={styles.amount}>₹{todayTotal}</Text>
           <Text style={styles.subtitle}>
             {completedDeliveries} completed drops • {distanceKm} km on duty
@@ -58,19 +58,27 @@ export const EarningsCard: React.FC<EarningsCardProps> = ({
           </View>
           <View style={styles.breakdownItem}>
             <Text style={styles.breakdownLabel}>Rain 🌧️</Text>
-            <Text style={[styles.breakdownValue, styles.bonusText]}>+₹{breakdown.rain}</Text>
+            <Text style={[styles.breakdownValue, styles.bonusText]}>
+              +₹{breakdown.rain}
+            </Text>
           </View>
           <View style={styles.breakdownItem}>
             <Text style={styles.breakdownLabel}>Peak ⚡</Text>
-            <Text style={[styles.breakdownValue, styles.bonusText]}>+₹{breakdown.peak}</Text>
+            <Text style={[styles.breakdownValue, styles.bonusText]}>
+              +₹{breakdown.peak}
+            </Text>
           </View>
           <View style={styles.breakdownItem}>
             <Text style={styles.breakdownLabel}>Festival 🎉</Text>
-            <Text style={[styles.breakdownValue, styles.bonusText]}>₹{breakdown.festival}</Text>
+            <Text style={[styles.breakdownValue, styles.bonusText]}>
+              ₹{breakdown.festival}
+            </Text>
           </View>
           <View style={styles.breakdownItem}>
             <Text style={styles.breakdownLabel}>Tips ⭐</Text>
-            <Text style={[styles.breakdownValue, styles.tipText]}>+₹{breakdown.tips}</Text>
+            <Text style={[styles.breakdownValue, styles.tipText]}>
+              +₹{breakdown.tips}
+            </Text>
           </View>
         </View>
       )}
@@ -84,7 +92,7 @@ export const EarningsCard: React.FC<EarningsCardProps> = ({
           </View>
 
           <PrimaryButton
-            title={isCashoutLoading ? 'Processing...' : 'Instant Cashout'}
+            title={isCashoutLoading ? "Processing..." : "Instant Cashout"}
             onPress={onCashoutPress}
             loading={isCashoutLoading}
             style={styles.cashoutBtn}
@@ -101,9 +109,9 @@ const styles = StyleSheet.create({
     marginBottom: spacing.md,
   },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   tag: {
     ...typography.caption,
@@ -121,8 +129,8 @@ const styles = StyleSheet.create({
     color: colors.textPrimary,
   },
   breakdownContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    justifyContent: "space-between",
     backgroundColor: colors.surface,
     padding: spacing.sm + 2,
     borderRadius: 8,
@@ -131,7 +139,7 @@ const styles = StyleSheet.create({
     borderColor: colors.border,
   },
   breakdownItem: {
-    alignItems: 'center',
+    alignItems: "center",
   },
   breakdownLabel: {
     ...typography.caption,
@@ -141,7 +149,7 @@ const styles = StyleSheet.create({
   },
   breakdownValue: {
     ...typography.caption,
-    fontWeight: '700',
+    fontWeight: "700",
     color: colors.textPrimary,
   },
   bonusText: {
@@ -151,9 +159,9 @@ const styles = StyleSheet.create({
     color: colors.success,
   },
   cashoutRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     marginTop: spacing.md,
     paddingTop: spacing.md,
     borderTopWidth: 1,
@@ -166,7 +174,7 @@ const styles = StyleSheet.create({
   cashoutAmount: {
     ...typography.subtitle1,
     color: colors.textPrimary,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   cashoutBtn: {
     height: 38,

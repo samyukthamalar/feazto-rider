@@ -4,23 +4,21 @@
  * "Main dashboard with online status and quick actions."
  */
 
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
+import { useState } from "react";
 import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { PrimaryButton } from '../../src/components/common/PrimaryButton';
-import { WorkflowBar } from '../../src/components/common/WorkflowBar';
-import { colors } from '../../src/constants/colors';
-import { spacing } from '../../src/constants/spacing';
-import { typography } from '../../src/constants/typography';
-import { useRiderStore } from '../../src/store/riderStore';
+    ScrollView,
+    StyleSheet,
+    Text,
+    TouchableOpacity,
+    View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { PrimaryButton } from "../../src/components/common/PrimaryButton";
+import { WorkflowBar } from "../../src/components/common/WorkflowBar";
+import { colors } from "../../src/constants/colors";
+import { typography } from "../../src/constants/typography";
 
 export default function HomeDashboardScreen() {
   const router = useRouter();
@@ -37,12 +35,25 @@ export default function HomeDashboardScreen() {
         </Text>
 
         <TouchableOpacity
-          style={[styles.statusPill, isOnline ? styles.pillOnline : styles.pillOffline]}
+          style={[
+            styles.statusPill,
+            isOnline ? styles.pillOnline : styles.pillOffline,
+          ]}
           onPress={() => setIsOnline(!isOnline)}
         >
-          <View style={[styles.statusDot, isOnline ? styles.dotOnline : styles.dotOffline]} />
-          <Text style={[styles.statusText, isOnline ? styles.textOnline : styles.textOffline]}>
-            {isOnline ? 'Online' : 'Offline'}
+          <View
+            style={[
+              styles.statusDot,
+              isOnline ? styles.dotOnline : styles.dotOffline,
+            ]}
+          />
+          <Text
+            style={[
+              styles.statusText,
+              isOnline ? styles.textOnline : styles.textOffline,
+            ]}
+          >
+            {isOnline ? "Online" : "Offline"}
           </Text>
         </TouchableOpacity>
       </View>
@@ -50,7 +61,7 @@ export default function HomeDashboardScreen() {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Today's Orders Card */}
         <View style={styles.ordersCard}>
-          <Text style={styles.cardHeading}>Today's Orders</Text>
+          <Text style={styles.cardHeading}>Today&apos;s Orders</Text>
 
           <View style={styles.statsRow}>
             {/* Pending */}
@@ -81,7 +92,7 @@ export default function HomeDashboardScreen() {
 
           <PrimaryButton
             title="View Orders"
-            onPress={() => router.push('/order-received')}
+            onPress={() => router.push("/order-received")}
             style={styles.viewOrdersBtn}
           />
         </View>
@@ -91,7 +102,7 @@ export default function HomeDashboardScreen() {
           {/* My Earnings */}
           <TouchableOpacity
             style={styles.menuItem}
-            onPress={() => router.push('/(tabs)/earnings')}
+            onPress={() => router.push("/(tabs)/earnings")}
           >
             <View style={styles.menuLeft}>
               <View style={styles.menuIconCircle}>
@@ -105,7 +116,7 @@ export default function HomeDashboardScreen() {
           {/* Profile */}
           <TouchableOpacity
             style={styles.menuItem}
-            onPress={() => router.push('/(tabs)/profile')}
+            onPress={() => router.push("/(tabs)/profile")}
           >
             <View style={styles.menuLeft}>
               <View style={styles.menuIconCircle}>
@@ -119,7 +130,7 @@ export default function HomeDashboardScreen() {
           {/* Settings */}
           <TouchableOpacity
             style={[styles.menuItem, styles.menuItemLast]}
-            onPress={() => router.push('/(tabs)/profile')}
+            onPress={() => router.push("/(tabs)/profile")}
           >
             <View style={styles.menuLeft}>
               <View style={styles.menuIconCircle}>
@@ -142,40 +153,40 @@ export default function HomeDashboardScreen() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: "#F8F9FA",
   },
   topBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 20,
     paddingVertical: 12,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderBottomWidth: 1,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: "#E5E7EB",
   },
   logoText: {
     fontSize: 24,
-    fontWeight: '900',
-    color: '#111827',
+    fontWeight: "900",
+    color: "#111827",
     letterSpacing: -0.8,
   },
   logoYellow: {
     color: colors.brandYellow,
   },
   statusPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
     gap: 6,
   },
   pillOnline: {
-    backgroundColor: '#D1FAE5',
+    backgroundColor: "#D1FAE5",
   },
   pillOffline: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: "#F3F4F6",
   },
   statusDot: {
     width: 8,
@@ -183,32 +194,32 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   dotOnline: {
-    backgroundColor: '#10B981',
+    backgroundColor: "#10B981",
   },
   dotOffline: {
-    backgroundColor: '#9CA3AF',
+    backgroundColor: "#9CA3AF",
   },
   statusText: {
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "700",
   },
   textOnline: {
-    color: '#065F46',
+    color: "#065F46",
   },
   textOffline: {
-    color: '#6B7280',
+    color: "#6B7280",
   },
   scrollContent: {
     padding: 16,
     gap: 16,
   },
   ordersCard: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     padding: 18,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    shadowColor: '#000',
+    borderColor: "#E5E7EB",
+    shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.04,
     shadowRadius: 6,
@@ -217,85 +228,85 @@ const styles = StyleSheet.create({
   cardHeading: {
     ...typography.subtitle1,
     fontSize: 17,
-    fontWeight: '800',
-    color: '#111827',
+    fontWeight: "800",
+    color: "#111827",
     marginBottom: 16,
   },
   statsRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-around',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
     marginBottom: 20,
   },
   statItem: {
-    alignItems: 'center',
+    alignItems: "center",
     flex: 1,
   },
   statVal: {
     fontSize: 20,
-    fontWeight: '800',
-    color: '#111827',
+    fontWeight: "800",
+    color: "#111827",
   },
   ratingRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 2,
   },
   statLabel: {
     ...typography.caption,
     color: colors.textSecondary,
     marginTop: 4,
-    fontWeight: '600',
+    fontWeight: "600",
   },
   statDivider: {
     width: 1,
     height: 32,
-    backgroundColor: '#E5E7EB',
+    backgroundColor: "#E5E7EB",
   },
   viewOrdersBtn: {
-    width: '100%',
+    width: "100%",
   },
   menuContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    overflow: 'hidden',
+    borderColor: "#E5E7EB",
+    overflow: "hidden",
   },
   menuItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: '#F3F4F6',
+    borderBottomColor: "#F3F4F6",
   },
   menuItemLast: {
     borderBottomWidth: 0,
   },
   menuLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 12,
   },
   menuIconCircle: {
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#F3F4F6',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "#F3F4F6",
+    alignItems: "center",
+    justifyContent: "center",
   },
   menuTitle: {
     fontSize: 15,
-    fontWeight: '700',
-    color: '#111827',
+    fontWeight: "700",
+    color: "#111827",
   },
   captionText: {
     ...typography.caption,
     color: colors.textMuted,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 12,
   },
 });
