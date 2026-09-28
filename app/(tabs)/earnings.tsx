@@ -34,7 +34,7 @@ export default function EarningsScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <WorkflowBar currentStep={19} />
+      <WorkflowBar currentStep={18} />
 
       {/* Header */}
       <View style={styles.header}>

@@ -12,6 +12,7 @@ import { Pill } from '../../src/components/common/Pill';
 import { PrimaryButton } from '../../src/components/common/PrimaryButton';
 import { SecondaryButton } from '../../src/components/common/SecondaryButton';
 import { StatusBadge } from '../../src/components/common/StatusBadge';
+import { WorkflowBar } from '../../src/components/common/WorkflowBar';
 import { Header } from '../../src/components/navigation/Header';
 import { colors } from '../../src/constants/colors';
 import { spacing } from '../../src/constants/spacing';
@@ -33,7 +34,8 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <Header title="Rider Profile" />
+      <WorkflowBar currentStep={19} />
+      <Header title="Rider Profile & Settings" />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         {/* Profile Card */}

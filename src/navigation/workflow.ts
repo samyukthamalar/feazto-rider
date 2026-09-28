@@ -149,11 +149,19 @@ export const WORKFLOW_SCREENS: WorkflowScreen[] = [
     nextRoute: '/(tabs)/earnings',
   },
   {
-    step: 19,
+    step: 18,
     title: 'Earnings',
-    subtitle: 'Manage profile, KYC, payment details, support and more.',
+    subtitle: 'Manage earnings, incentives, and payment details.',
     route: '/(tabs)/earnings',
     prevRoute: '/(tabs)/orders',
+    nextRoute: '/(tabs)/profile',
+  },
+  {
+    step: 19,
+    title: 'Profile / Settings',
+    subtitle: 'Manage profile, KYC, app settings, and support.',
+    route: '/(tabs)/profile',
+    prevRoute: '/(tabs)/earnings',
     nextRoute: '/logout',
   },
   {
@@ -161,7 +169,7 @@ export const WORKFLOW_SCREENS: WorkflowScreen[] = [
     title: 'Logout',
     subtitle: 'Logout option for security.',
     route: '/logout',
-    prevRoute: '/(tabs)/earnings',
+    prevRoute: '/(tabs)/profile',
     nextRoute: '/(auth)/login',
   },
 ];
