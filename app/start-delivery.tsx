@@ -10,25 +10,33 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../src/components/common/PrimaryButton';
-import { WorkflowBar } from '../src/components/common/WorkflowBar';
 import { colors } from '../src/constants/colors';
 import { spacing } from '../src/constants/spacing';
 import { typography } from '../src/constants/typography';
 import { useUIStore } from '../src/store/uiStore';
+import { orderService } from '../services/orderService';
+import { useState } from 'react';
+
+import { useOrderStore } from '../src/store/orderStore';
 
 export default function StartDeliveryScreen() {
   const router = useRouter();
   const showToast = useUIStore((state) => state.showToast);
+  const [loading, setLoading] = useState(false);
 
-  const handleStartDelivery = () => {
-    showToast('Starting navigation to customer! Drive safely.', 'success');
+  const handleStartDelivery = async () => {
+    setLoading(true);
+    await orderService.startDelivery('2FS28734');
+    useOrderStore.getState().updateOrderStatus('OUT_FOR_DELIVERY');
+    useOrderStore.getState().advanceStage();
+    setLoading(false);
+    showToast('Status: Out for Delivery! Starting navigation to customer.', 'success');
     router.push('/navigate-customer' as any);
   };
 
+
   return (
     <SafeAreaView style={styles.safeArea}>
-      <WorkflowBar currentStep={10} />
-
       <View style={styles.container}>
         <View style={styles.centerContent}>
           {/* Green Checkmark Circle */}
@@ -44,8 +52,9 @@ export default function StartDeliveryScreen() {
 
           {/* Start Delivery Button */}
           <PrimaryButton
-            title="Start Delivery"
+            title={loading ? "Starting..." : "Start Delivery"}
             onPress={handleStartDelivery}
+            loading={loading}
             style={styles.startBtn}
           />
 

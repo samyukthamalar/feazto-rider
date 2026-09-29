@@ -16,26 +16,28 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../src/components/common/PrimaryButton';
-import { WorkflowBar } from '../src/components/common/WorkflowBar';
 import { colors } from '../src/constants/colors';
 import { spacing } from '../src/constants/spacing';
 import { typography } from '../src/constants/typography';
 import { useUIStore } from '../src/store/uiStore';
+import { orderService } from '../services/orderService';
 
 export default function OrderReceivedScreen() {
   const router = useRouter();
   const showToast = useUIStore((state) => state.showToast);
   const [showDetails, setShowDetails] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleAcceptOrder = () => {
+  const handleAcceptOrder = async () => {
+    setLoading(true);
+    await orderService.acceptOrder('2FS28734');
+    setLoading(false);
     showToast('Order #2FS28734 Accepted! Proceeding to Cloud Kitchen pickup.', 'success');
     router.push('/pickup-qr');
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <WorkflowBar currentStep={7} />
-
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>New Order</Text>
@@ -68,8 +70,8 @@ export default function OrderReceivedScreen() {
                 <Ionicons name="restaurant-outline" size={16} color="#B45309" />
               </View>
               <View style={styles.pointInfo}>
-                <Text style={styles.pointName}>From Cloud Kitchen</Text>
-                <Text style={styles.pointSub}>(Ready for pickup)</Text>
+                <Text style={styles.pointName}>Biryani Box Hub (Cloud Kitchen)</Text>
+                <Text style={styles.pointSub}>Anna Nagar West • Ready for pickup</Text>
               </View>
             </View>
 
@@ -81,11 +83,12 @@ export default function OrderReceivedScreen() {
                 <Ionicons name="location" size={16} color="#EF4444" />
               </View>
               <View style={styles.pointInfo}>
-                <Text style={styles.pointName}>To Customer</Text>
-                <Text style={styles.pointSub}>2.1 km • 8 mins</Text>
+                <Text style={styles.pointName}>Customer: Arun Kumar</Text>
+                <Text style={styles.pointSub}>12, Green Park Street, Chennai (2.1 km • 8 mins)</Text>
               </View>
             </View>
           </View>
+
 
           {/* Details Accordion */}
           {showDetails && (
@@ -101,6 +104,7 @@ export default function OrderReceivedScreen() {
             <PrimaryButton
               title="Accept Order"
               onPress={handleAcceptOrder}
+              loading={loading}
               style={styles.acceptBtn}
             />
 

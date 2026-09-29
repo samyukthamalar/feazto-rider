@@ -5,8 +5,8 @@
  */
 
 import { Ionicons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useFocusEffect, useRouter } from "expo-router";
+import React, { useCallback, useState } from "react";
 import {
     ScrollView,
     StyleSheet,
@@ -15,19 +15,76 @@ import {
     View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { earningsService, riderService } from "../../services";
 import { PrimaryButton } from "../../src/components/common/PrimaryButton";
-import { WorkflowBar } from "../../src/components/common/WorkflowBar";
 import { colors } from "../../src/constants/colors";
 import { typography } from "../../src/constants/typography";
+import { useUIStore } from "../../src/store/uiStore";
 
 export default function HomeDashboardScreen() {
   const router = useRouter();
-  const [isOnline, setIsOnline] = useState(true);
+  const showToast = useUIStore((state) => state.showToast);
+  const [isOnline, setIsOnline] = useState(false);
+  const [hasIncomingOrder, setHasIncomingOrder] = useState(false);
+  const [earningsAmount, setEarningsAmount] = useState('₹1,250');
+  const [pendingCount, setPendingCount] = useState(1);
+  const [rating, setRating] = useState('4.8');
+
+  const loadDashboardStats = useCallback(async () => {
+    try {
+      const [earningsData, profileData, currentDuty] = await Promise.all([
+        earningsService.getEarningsSummary('today'),
+        riderService.getProfile(),
+        riderService.getDutyStatus(),
+      ]);
+      setIsOnline(currentDuty);
+      if (currentDuty) {
+        setHasIncomingOrder(true);
+      }
+      if (earningsData) {
+        setEarningsAmount(`₹${earningsData.totalEarnings.toLocaleString('en-IN')}`);
+        setPendingCount(earningsData.completedDeliveries > 0 ? 0 : 1);
+      }
+      if (profileData) {
+        setRating(profileData.rating.toString());
+      }
+    } catch {
+      // use defaults
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadDashboardStats();
+    }, [loadDashboardStats])
+  );
+
+  const handleToggleOnline = async () => {
+    const nextStatus = !isOnline;
+    setIsOnline(nextStatus);
+    await riderService.updateDutyStatus(nextStatus);
+    if (nextStatus) {
+      showToast('You are now ONLINE and ready to receive orders!', 'success');
+      setTimeout(() => {
+        setHasIncomingOrder(true);
+        showToast('🔔 New Delivery Request: Order #2FS28734 from Biryani Box Hub (₹286)', 'info');
+      }, 700);
+    } else {
+      setHasIncomingOrder(false);
+      showToast('You are now OFFLINE. You cannot receive orders.', 'info');
+    }
+  };
+
+  const handleViewOrders = () => {
+    if (!isOnline) {
+      showToast('You are currently offline. Turn Online to view and receive orders.', 'warning');
+      return;
+    }
+    router.push('/order-received');
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <WorkflowBar currentStep={6} />
-
       {/* Top Bar with Online Status */}
       <View style={styles.topBar}>
         <Text style={styles.logoText}>
@@ -39,7 +96,7 @@ export default function HomeDashboardScreen() {
             styles.statusPill,
             isOnline ? styles.pillOnline : styles.pillOffline,
           ]}
-          onPress={() => setIsOnline(!isOnline)}
+          onPress={handleToggleOnline}
         >
           <View
             style={[
@@ -66,7 +123,7 @@ export default function HomeDashboardScreen() {
           <View style={styles.statsRow}>
             {/* Pending */}
             <View style={styles.statItem}>
-              <Text style={styles.statVal}>5</Text>
+              <Text style={styles.statVal}>{isOnline ? (hasIncomingOrder ? 1 : 0) : 0}</Text>
               <Text style={styles.statLabel}>Pending</Text>
             </View>
 
@@ -74,7 +131,7 @@ export default function HomeDashboardScreen() {
 
             {/* Earnings */}
             <View style={styles.statItem}>
-              <Text style={styles.statVal}>₹1,250</Text>
+              <Text style={styles.statVal}>{earningsAmount}</Text>
               <Text style={styles.statLabel}>Earnings</Text>
             </View>
 
@@ -83,19 +140,43 @@ export default function HomeDashboardScreen() {
             {/* Rating */}
             <View style={styles.statItem}>
               <View style={styles.ratingRow}>
-                <Text style={styles.statVal}>4.8</Text>
+                <Text style={styles.statVal}>{rating}</Text>
                 <Ionicons name="star" size={14} color="#F59E0B" />
               </View>
               <Text style={styles.statLabel}>Rating</Text>
             </View>
           </View>
 
+          {/* Status Banner */}
+          {!isOnline ? (
+            <View style={styles.offlineNotice}>
+              <Ionicons name="moon-outline" size={16} color="#6B7280" />
+              <Text style={styles.offlineNoticeText}>
+                You are offline. Switch to Online above to receive orders.
+              </Text>
+            </View>
+          ) : hasIncomingOrder ? (
+            <TouchableOpacity
+              style={styles.incomingOrderBanner}
+              onPress={() => router.push('/order-received')}
+              activeOpacity={0.85}
+            >
+              <View style={styles.incomingBadge}>
+                <Ionicons name="flash" size={14} color="#B45309" />
+                <Text style={styles.incomingBadgeText}>NEW REQUEST</Text>
+              </View>
+              <Text style={styles.incomingTitle}>Order #2FS28734 • ₹286</Text>
+              <Text style={styles.incomingSub}>Biryani Box Hub → Arun Kumar (2.1 km)</Text>
+            </TouchableOpacity>
+          ) : null}
+
           <PrimaryButton
-            title="View Orders"
-            onPress={() => router.push("/order-received")}
+            title={isOnline ? "View Orders" : "Go Online to View Orders"}
+            onPress={isOnline ? handleViewOrders : handleToggleOnline}
             style={styles.viewOrdersBtn}
           />
         </View>
+
 
         {/* Quick Actions List */}
         <View style={styles.menuContainer}>
@@ -309,4 +390,51 @@ const styles = StyleSheet.create({
     textAlign: "center",
     marginTop: 12,
   },
+  offlineNotice: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#F3F4F6",
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 10,
+    gap: 8,
+    marginBottom: 16,
+  },
+  offlineNoticeText: {
+    fontSize: 12,
+    color: "#6B7280",
+    fontWeight: "600",
+    flex: 1,
+  },
+  incomingOrderBanner: {
+    backgroundColor: "#FEF3C7",
+    borderWidth: 1.5,
+    borderColor: colors.brandYellow,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 16,
+    gap: 4,
+  },
+  incomingBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  incomingBadgeText: {
+    fontSize: 10,
+    fontWeight: "900",
+    color: "#B45309",
+    letterSpacing: 0.5,
+  },
+  incomingTitle: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: "#111827",
+  },
+  incomingSub: {
+    fontSize: 12,
+    color: "#78350F",
+    fontWeight: "600",
+  },
 });
+

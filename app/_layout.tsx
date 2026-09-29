@@ -19,7 +19,7 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider style={styles.container}>
-      <StatusBar style="light" />
+      <StatusBar style="dark" />
 
       <ResponsiveShell>
         <Stack

@@ -10,25 +10,35 @@ import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../src/components/common/PrimaryButton';
-import { WorkflowBar } from '../src/components/common/WorkflowBar';
 import { colors } from '../src/constants/colors';
 import { spacing } from '../src/constants/spacing';
 import { typography } from '../src/constants/typography';
+import { earningsService, orderService } from '../services';
+import { useOrderStore } from '../src/store/orderStore';
 import { useUIStore } from '../src/store/uiStore';
 
 export default function DeliverCustomerScreen() {
   const router = useRouter();
   const showToast = useUIStore((state) => state.showToast);
+  const [loading, setLoading] = React.useState(false);
 
-  const handleFinish = () => {
-    showToast('Delivery completed and recorded in trip logs!', 'success');
-    router.push('/order-completed' as any);
+  const handleFinish = async () => {
+    try {
+      setLoading(true);
+      await orderService.completeDelivery('2FS28734');
+      earningsService.creditOrderEarnings(286);
+      useOrderStore.getState().completeDelivery();
+      showToast('Delivery completed and recorded in trip logs!', 'success');
+      router.push('/order-completed' as any);
+    } catch {
+      router.push('/order-completed' as any);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <WorkflowBar currentStep={15} />
-
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={8}>
@@ -55,11 +65,13 @@ export default function DeliverCustomerScreen() {
         {/* Footer Actions */}
         <View style={styles.footer}>
           <PrimaryButton
-            title="Finish"
+            title={loading ? "Finalizing..." : "Mark as Delivered"}
             onPress={handleFinish}
+            loading={loading}
             style={styles.finishBtn}
           />
           <Text style={styles.captionText}>
+
             Complete delivery and mark as delivered.
           </Text>
         </View>

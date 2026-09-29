@@ -17,35 +17,61 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../src/components/common/PrimaryButton';
 import { SecondaryButton } from '../src/components/common/SecondaryButton';
-import { WorkflowBar } from '../src/components/common/WorkflowBar';
 import { colors } from '../src/constants/colors';
 import { spacing } from '../src/constants/spacing';
 import { typography } from '../src/constants/typography';
 import { useUIStore } from '../src/store/uiStore';
+
+import * as Linking from 'expo-linking';
+import { useOrderStore } from '../src/store/orderStore';
 
 export default function CallCustomerScreen() {
   const router = useRouter();
   const showToast = useUIStore((state) => state.showToast);
   const [calling, setCalling] = useState(false);
 
-  const handleCall = () => {
+  const handleCall = async () => {
     setCalling(true);
-    showToast('Calling Customer (+91 98765 43210)...', 'info');
-    setTimeout(() => {
+    const phoneNumber = '+919876543210';
+    try {
+      const url = `tel:${phoneNumber}`;
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
+        showToast('Opening native phone dialer for Arun Kumar...', 'info');
+      } else {
+        showToast(`Dialer unavailable. Dial: ${phoneNumber}`, 'info');
+      }
+    } catch {
+      showToast(`Calling ${phoneNumber}...`, 'info');
+    } finally {
       setCalling(false);
-      showToast('Customer confirmed: "Please leave with security or handover at door."', 'success');
-      router.push('/confirm-delivery' as any);
-    }, 1200);
+    }
   };
 
-  const handleMessage = () => {
-    showToast('SMS sent: "FEAzTO Rider has arrived at your doorstep."', 'info');
+  const handleMessage = async () => {
+    const phoneNumber = '+919876543210';
+    try {
+      const url = `sms:${phoneNumber}`;
+      const canOpen = await Linking.canOpenURL(url);
+      if (canOpen) {
+        await Linking.openURL(url);
+      } else {
+        showToast('SMS app opened for +91 98765 43210', 'info');
+      }
+    } catch {
+      showToast('SMS sent: "FEAzTO Rider has arrived at your doorstep."', 'info');
+    }
+  };
+
+  const handleProceed = () => {
+    useOrderStore.getState().advanceStage();
+    showToast('Customer contacted. Proceeding to delivery confirmation.', 'success');
+    router.push('/confirm-delivery' as any);
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <WorkflowBar currentStep={13} />
-
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={8}>
@@ -61,8 +87,9 @@ export default function CallCustomerScreen() {
           <View style={styles.avatarCircle}>
             <Ionicons name="person" size={54} color="#1E293B" />
           </View>
-          <Text style={styles.customerName}>Customer</Text>
+          <Text style={styles.customerName}>Arun Kumar</Text>
           <Text style={styles.customerPhone}>+91 98765 43210</Text>
+          <Text style={styles.customerAddress}>12, Green Park Street, Chennai</Text>
           <View style={styles.deliveryBadge}>
             <Text style={styles.deliveryBadgeText}>Order #2FS28734</Text>
           </View>
@@ -71,7 +98,7 @@ export default function CallCustomerScreen() {
         {/* Action Buttons */}
         <View style={styles.actionsCard}>
           <PrimaryButton
-            title={calling ? 'Connecting...' : 'Call'}
+            title={calling ? 'Opening Dialer...' : 'Call Customer'}
             onPress={handleCall}
             loading={calling}
             style={styles.callBtn}
@@ -79,7 +106,7 @@ export default function CallCustomerScreen() {
           />
 
           <SecondaryButton
-            title="Message"
+            title="Send SMS"
             onPress={handleMessage}
             variant="surface"
             style={styles.messageBtn}
@@ -88,11 +115,12 @@ export default function CallCustomerScreen() {
 
           <TouchableOpacity
             style={styles.proceedLink}
-            onPress={() => router.push('/confirm-delivery' as any)}
+            onPress={handleProceed}
           >
-            <Text style={styles.proceedText}>Skip Call & Proceed to Handover →</Text>
+            <Text style={styles.proceedText}>Confirm Contact & Handover Food →</Text>
           </TouchableOpacity>
         </View>
+
 
         <Text style={styles.captionText}>
           Call the customer before delivery.
@@ -155,7 +183,14 @@ const styles = StyleSheet.create({
     color: colors.textSecondary,
     marginTop: 4,
   },
+  customerAddress: {
+    fontSize: 13,
+    color: '#6B7280',
+    marginTop: 2,
+    fontWeight: '500',
+  },
   deliveryBadge: {
+
     marginTop: 12,
     backgroundColor: '#FEF3C7',
     paddingHorizontal: 12,

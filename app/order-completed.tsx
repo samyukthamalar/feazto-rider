@@ -10,24 +10,27 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { CelebrationIllustration } from "../src/components/brand/RiderIllustration";
 import { PrimaryButton } from "../src/components/common/PrimaryButton";
-import { WorkflowBar } from "../src/components/common/WorkflowBar";
 import { colors } from "../src/constants/colors";
 import { typography } from "../src/constants/typography";
 import { useUIStore } from "../src/store/uiStore";
+import { riderService } from "../services";
+import { useRiderStore } from "../src/store/riderStore";
+
 
 export default function OrderCompletedScreen() {
   const router = useRouter();
   const showToast = useUIStore((state) => state.showToast);
 
-  const handleGoHome = () => {
-    showToast("Earnings credited to wallet (+₹286)!", "success");
-    router.push("/(tabs)/orders");
+  const handleGoHome = async () => {
+    // Rider remains ONLINE unless manually switched offline
+    useRiderStore.getState().goOnline();
+    await riderService.updateDutyStatus(true);
+    showToast("Earnings credited to wallet (+₹286)! You are ONLINE.", "success");
+    router.replace("/(tabs)");
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <WorkflowBar currentStep={16} />
-
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={8}>
@@ -46,17 +49,29 @@ export default function OrderCompletedScreen() {
           <Text style={styles.title}>Great Job!</Text>
           <Text style={styles.subtitle}>You&apos;ve completed the order.</Text>
 
-          {/* Payout Tag */}
-          <View style={styles.payoutTag}>
-            <Text style={styles.payoutLabel}>CREDITED TO EARNINGS</Text>
-            <Text style={styles.payoutAmount}>+₹286.00</Text>
+          {/* Delivery Summary Card */}
+          <View style={styles.summaryCard}>
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Order ID</Text>
+              <Text style={styles.summaryValue}>#2FS28734</Text>
+            </View>
+            <View style={styles.summaryDivider} />
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Delivery Time</Text>
+              <Text style={styles.summaryValue}>18 mins</Text>
+            </View>
+            <View style={styles.summaryDivider} />
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Earnings Earned</Text>
+              <Text style={[styles.summaryValue, styles.earningsGreen]}>+₹286.00</Text>
+            </View>
           </View>
         </View>
 
         {/* Footer Actions */}
         <View style={styles.footer}>
           <PrimaryButton
-            title="Go to Home"
+            title="Return to Home"
             onPress={handleGoHome}
             style={styles.homeBtn}
           />
@@ -66,6 +81,7 @@ export default function OrderCompletedScreen() {
     </SafeAreaView>
   );
 }
+
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -147,4 +163,38 @@ const styles = StyleSheet.create({
     color: colors.textMuted,
     textAlign: "center",
   },
+  summaryCard: {
+    width: "100%",
+    backgroundColor: "#F9FAFB",
+    borderRadius: 16,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    marginTop: 20,
+    gap: 10,
+  },
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  summaryLabel: {
+    fontSize: 14,
+    color: "#6B7280",
+    fontWeight: "600",
+  },
+  summaryValue: {
+    fontSize: 15,
+    color: "#111827",
+    fontWeight: "800",
+  },
+  summaryDivider: {
+    height: 1,
+    backgroundColor: "#E5E7EB",
+  },
+  earningsGreen: {
+    color: "#059669",
+    fontSize: 17,
+  },
 });
+

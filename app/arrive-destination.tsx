@@ -16,25 +16,37 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../src/components/common/PrimaryButton';
-import { WorkflowBar } from '../src/components/common/WorkflowBar';
 import { colors } from '../src/constants/colors';
 import { spacing } from '../src/constants/spacing';
 import { typography } from '../src/constants/typography';
 import { useUIStore } from '../src/store/uiStore';
 
+import { orderService } from '../services';
+
+import { useOrderStore } from '../src/store/orderStore';
+
 export default function ArriveDestinationScreen() {
   const router = useRouter();
   const showToast = useUIStore((state) => state.showToast);
+  const [loading, setLoading] = React.useState(false);
 
-  const handleReached = () => {
-    showToast('Arrived at customer doorstep! Please contact customer.', 'success');
-    router.push('/call-customer' as any);
+  const handleReached = async () => {
+    try {
+      setLoading(true);
+      await orderService.markArrivedAtCustomer('2FS28734');
+      useOrderStore.getState().advanceStage();
+      showToast('Arrived at customer doorstep! Please contact customer.', 'success');
+      router.push('/call-customer' as any);
+    } catch {
+      router.push('/call-customer' as any);
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <WorkflowBar currentStep={12} />
-
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={8}>
@@ -56,8 +68,9 @@ export default function ArriveDestinationScreen() {
           </Text>
 
           <PrimaryButton
-            title="Reached"
+            title={loading ? "Updating..." : "Reached"}
             onPress={handleReached}
+            loading={loading}
             style={styles.reachedBtn}
           />
         </View>

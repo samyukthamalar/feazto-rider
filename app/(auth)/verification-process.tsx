@@ -10,7 +10,6 @@ import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../../src/components/common/PrimaryButton';
-import { WorkflowBar } from '../../src/components/common/WorkflowBar';
 import { colors } from '../../src/constants/colors';
 import { spacing } from '../../src/constants/spacing';
 import { typography } from '../../src/constants/typography';
@@ -27,8 +26,6 @@ export default function VerificationProcessScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <WorkflowBar currentStep={4} />
-
       <View style={styles.container}>
         <View style={styles.centerContent}>
           {/* Document Verification Graphic */}

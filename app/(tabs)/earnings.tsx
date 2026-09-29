@@ -5,8 +5,8 @@
  */
 
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import React, { useCallback, useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -16,16 +16,51 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { PrimaryButton } from '../../src/components/common/PrimaryButton';
-import { WorkflowBar } from '../../src/components/common/WorkflowBar';
 import { colors } from '../../src/constants/colors';
 import { spacing } from '../../src/constants/spacing';
 import { typography } from '../../src/constants/typography';
+import { earningsService } from '../../services';
 import { useUIStore } from '../../src/store/uiStore';
 
 export default function EarningsScreen() {
   const router = useRouter();
   const showToast = useUIStore((state) => state.showToast);
   const [showDetailedBreakdown, setShowDetailedBreakdown] = useState(false);
+  const [period, setPeriod] = useState<'today' | 'week' | 'month'>('today');
+  const [earnings, setEarnings] = useState({
+    totalEarnings: 1250,
+    completedDeliveries: 5,
+    deliveryEarnings: 1050,
+    incentives: 200,
+  });
+
+  const loadEarnings = useCallback(async () => {
+    try {
+      const data = await earningsService.getEarningsSummary(period);
+      if (data) {
+        setEarnings({
+          totalEarnings: data.totalEarnings,
+          completedDeliveries: data.completedDeliveries,
+          deliveryEarnings: data.deliveryEarnings,
+          incentives: data.incentives,
+        });
+      }
+    } catch (err) {
+      // keep current
+    }
+  }, [period]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadEarnings();
+    }, [loadEarnings])
+  );
+
+  const cyclePeriod = () => {
+    const nextPeriod = period === 'today' ? 'week' : period === 'week' ? 'month' : 'today';
+    setPeriod(nextPeriod);
+    showToast(`Showing ${nextPeriod.toUpperCase()} earnings`, 'info');
+  };
 
   const handleViewDetails = () => {
     setShowDetailedBreakdown(!showDetailedBreakdown);
@@ -34,8 +69,6 @@ export default function EarningsScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <WorkflowBar currentStep={18} />
-
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.push('/(tabs)')} hitSlop={8}>
@@ -49,26 +82,28 @@ export default function EarningsScreen() {
         {/* Earnings Hero Card */}
         <View style={styles.earningsHeroCard}>
           {/* Filter selector */}
-          <View style={styles.filterPill}>
-            <Text style={styles.filterText}>Today</Text>
+          <TouchableOpacity style={styles.filterPill} onPress={cyclePeriod}>
+            <Text style={styles.filterText}>
+              {period === 'today' ? 'Today' : period === 'week' ? 'This Week' : 'This Month'}
+            </Text>
             <Ionicons name="chevron-down" size={14} color="#6B7280" />
-          </View>
+          </TouchableOpacity>
 
           {/* Big Amount */}
-          <Text style={styles.bigAmount}>₹1,250</Text>
-          <Text style={styles.deliveriesCount}>5 Deliveries</Text>
+          <Text style={styles.bigAmount}>₹{earnings.totalEarnings.toLocaleString('en-IN')}</Text>
+          <Text style={styles.deliveriesCount}>{earnings.completedDeliveries} Deliveries</Text>
 
           <View style={styles.divider} />
 
           {/* Breakdown Items */}
           <View style={styles.breakdownRow}>
             <Text style={styles.breakdownLabel}>Delivery Earnings</Text>
-            <Text style={styles.breakdownValue}>₹1,050</Text>
+            <Text style={styles.breakdownValue}>₹{earnings.deliveryEarnings.toLocaleString('en-IN')}</Text>
           </View>
 
           <View style={styles.breakdownRow}>
             <Text style={styles.breakdownLabel}>Incentives</Text>
-            <Text style={[styles.breakdownValue, styles.incentivesValue]}>₹200</Text>
+            <Text style={[styles.breakdownValue, styles.incentivesValue]}>₹{earnings.incentives.toLocaleString('en-IN')}</Text>
           </View>
 
           {showDetailedBreakdown && (
@@ -91,6 +126,14 @@ export default function EarningsScreen() {
             </View>
           )}
 
+          {/* Payout Status Indicator */}
+          <View style={styles.payoutStatusRow}>
+            <Ionicons name="checkmark-circle" size={16} color="#10B981" />
+            <Text style={styles.payoutStatusText}>
+              Payout Status: Active (Direct daily UPI settlement to HDFC Bank)
+            </Text>
+          </View>
+
           {/* Primary View Details Button */}
           <PrimaryButton
             title={showDetailedBreakdown ? 'Hide Details' : 'View Details'}
@@ -98,6 +141,7 @@ export default function EarningsScreen() {
             style={styles.viewDetailsBtn}
           />
         </View>
+
 
         {/* Quick management shortcuts */}
         <View style={styles.quickCard}>
@@ -242,10 +286,29 @@ const styles = StyleSheet.create({
     color: '#B45309',
     fontWeight: '600',
   },
+  payoutStatusRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#ECFDF5',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+    gap: 6,
+    marginTop: 12,
+    borderWidth: 1,
+    borderColor: '#D1FAE5',
+  },
+  payoutStatusText: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#065F46',
+    flex: 1,
+  },
   viewDetailsBtn: {
     width: '100%',
-    marginTop: 20,
+    marginTop: 16,
   },
+
   quickCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 16,

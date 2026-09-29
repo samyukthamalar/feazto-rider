@@ -3,52 +3,65 @@
  * Source of truth: FEAzTO Rider Master Prompt Section 13 & 14
  */
 
-import { useRouter } from 'expo-router';
-import React from 'react';
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Card } from '../../src/components/common/Card';
-import { Pill } from '../../src/components/common/Pill';
-import { PrimaryButton } from '../../src/components/common/PrimaryButton';
-import { SecondaryButton } from '../../src/components/common/SecondaryButton';
-import { StatusBadge } from '../../src/components/common/StatusBadge';
-import { Header } from '../../src/components/navigation/Header';
-import { colors } from '../../src/constants/colors';
-import { borderRadius, spacing } from '../../src/constants/spacing';
-import { typography } from '../../src/constants/typography';
-import { useAuthStore } from '../../src/store/authStore';
-import { useRiderStore } from '../../src/store/riderStore';
-import { useUIStore } from '../../src/store/uiStore';
-import { VerificationStatus } from '../../src/types/rider';
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
+import { useEffect } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Card } from "../../src/components/common/Card";
+import { Pill } from "../../src/components/common/Pill";
+import { PrimaryButton } from "../../src/components/common/PrimaryButton";
+import { SecondaryButton } from "../../src/components/common/SecondaryButton";
+import { StatusBadge } from "../../src/components/common/StatusBadge";
+import { Header } from "../../src/components/navigation/Header";
+import { colors } from "../../src/constants/colors";
+import { borderRadius, spacing } from "../../src/constants/spacing";
+import { typography } from "../../src/constants/typography";
+import { useAuthStore } from "../../src/store/authStore";
+import { useRiderStore } from "../../src/store/riderStore";
+import { useUIStore } from "../../src/store/uiStore";
+
+const VERIFICATION_STATUS_KEY = "feazto_kyc_verification_status";
 
 export default function VerificationStatusScreen() {
   const router = useRouter();
   const status = useAuthStore((state) => state.verificationStatus);
   const correctionReason = useAuthStore((state) => state.correctionReason);
-  const setVerificationStatus = useAuthStore((state) => state.setVerificationStatus);
-  const setRiderVerification = useRiderStore((state) => state.setVerificationStatus);
+  const setVerificationStatus = useAuthStore(
+    (state) => state.setVerificationStatus,
+  );
+  const setRiderVerification = useRiderStore(
+    (state) => state.setVerificationStatus,
+  );
   const verifiedDocs = useAuthStore((state) => state.verifiedDocuments);
   const showToast = useUIStore((state) => state.showToast);
 
-  const isApproved = status === 'APPROVED';
-  const isNeedsCorrection = status === 'NEEDS_CORRECTION';
-  const isPending = status === 'PENDING';
+  useEffect(() => {
+    const restoreStatus = async () => {
+      try {
+        const savedStatus = await AsyncStorage.getItem(VERIFICATION_STATUS_KEY);
+        if (savedStatus === "PENDING") {
+          setVerificationStatus("PENDING");
+          setRiderVerification("PENDING");
+        }
+      } catch {
+        showToast("Saved verification status could not be loaded", "warning");
+      }
+    };
+    void restoreStatus();
+  }, [setRiderVerification, setVerificationStatus, showToast]);
 
-  const handleSwitchStatus = (newStatus: VerificationStatus) => {
-    setVerificationStatus(newStatus);
-    setRiderVerification(newStatus);
-    showToast(`Simulated status: ${newStatus}`, 'info');
-  };
+  const isApproved = status === "APPROVED";
+  const isNeedsCorrection = status === "NEEDS_CORRECTION";
+  const isPending = status === "PENDING";
 
   const handleProceed = () => {
     if (isApproved) {
-      router.replace('/(tabs)');
+      router.replace("/(tabs)");
     } else if (isNeedsCorrection) {
-      router.push('/(onboarding)/licence');
+      router.push("/(onboarding)/licence");
     } else {
-      // In pending, allow instant simulation approval
-      handleSwitchStatus('APPROVED');
-      router.replace('/(tabs)');
+      router.replace("/(tabs)");
     }
   };
 
@@ -57,100 +70,176 @@ export default function VerificationStatusScreen() {
       <Header title="Credential Verification" showStatusBadge={false} />
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Interactive State Simulation Bar */}
-        <View style={styles.simBar}>
-          <Text style={styles.simLabel}>Demo State Switcher:</Text>
-          <View style={styles.simPills}>
-            <TouchableOpacity onPress={() => handleSwitchStatus('APPROVED')}>
-              <Pill label="APPROVED" tone={isApproved ? 'green' : 'neutral'} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleSwitchStatus('PENDING')}>
-              <Pill label="PENDING" tone={isPending ? 'yellow' : 'neutral'} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleSwitchStatus('NEEDS_CORRECTION')}>
-              <Pill label="NEEDS CORRECTION" tone={isNeedsCorrection ? 'danger' : 'neutral'} />
-            </TouchableOpacity>
-          </View>
-        </View>
-
         {/* Status Hero Card */}
         <Card
           style={styles.heroCard}
-          variant={isApproved ? 'highlight' : isNeedsCorrection ? 'surface' : 'surface'}
+          variant={
+            isApproved ? "highlight" : isNeedsCorrection ? "surface" : "surface"
+          }
         >
           <View style={styles.badgeWrapper}>
             <StatusBadge
-              label={status.replace(/_/g, ' ')}
-              variant={isApproved ? 'approved' : isNeedsCorrection ? 'needs_correction' : 'pending'}
+              label={isPending ? "UNDER REVIEW" : status.replace(/_/g, " ")}
+              variant={
+                isApproved
+                  ? "approved"
+                  : isNeedsCorrection
+                    ? "needs_correction"
+                    : "pending"
+              }
               pulse={isApproved}
             />
           </View>
 
           <Text style={styles.statusTitle}>
             {isApproved
-              ? 'Onboarding Approved & Cleared'
+              ? "Onboarding Approved & Cleared"
               : isNeedsCorrection
-              ? 'Document Correction Required'
-              : 'Credentials Under Hub Review'}
+                ? "Document Correction Required"
+                : "KYC Status: Under Review"}
           </Text>
 
           <Text style={styles.statusDescription}>
             {isApproved
-              ? 'All government driving credentials, commercial vehicle documents, and bank payout records are verified for active delivery dispatch.'
+              ? "All government driving credentials, commercial vehicle documents, and bank payout records are verified for active delivery dispatch."
               : isNeedsCorrection
-              ? correctionReason || 'One or more submitted documents require re-upload. Please review below.'
-              : 'Our operations team is validating your documents against the regional RTO portal. Estimated turnaround: 2-4 hours.'}
+                ? correctionReason ||
+                  "One or more submitted documents require re-upload. Please review below."
+                : "Your documents are saved on this device and marked Under Review in this frontend prototype."}
           </Text>
 
           {/* Document Verification Breakdown */}
           <View style={styles.docsList}>
             <View style={styles.docItem}>
-              <Text style={styles.checkIcon}>{verifiedDocs.identity ? '✓' : '⏳'}</Text>
-              <View style={styles.docInfo}>
-                <Text style={styles.docTitle}>Identity & Emergency Contact</Text>
-                <Text style={styles.docSubtitle}>Aadhaar & next-of-kin contact verified</Text>
-              </View>
-              <Pill label={verifiedDocs.identity ? 'Cleared' : 'Pending'} tone={verifiedDocs.identity ? 'green' : 'neutral'} />
-            </View>
-
-            <View style={styles.docDivider} />
-
-            <View style={styles.docItem}>
-              <Text style={[styles.checkIcon, isNeedsCorrection && styles.checkError]}>
-                {isNeedsCorrection ? '⚠️' : verifiedDocs.licence ? '✓' : '⏳'}
+              <Text style={styles.checkIcon}>
+                {isPending ? "⏳" : verifiedDocs.identity ? "✓" : "⏳"}
               </Text>
               <View style={styles.docInfo}>
-                <Text style={styles.docTitle}>Driving Licence (MCWG)</Text>
-                <Text style={[styles.docSubtitle, isNeedsCorrection && styles.errorSub]}>
-                  {isNeedsCorrection ? 'Front photo blurry. Re-upload needed.' : 'Active validity until 2035'}
+                <Text style={styles.docTitle}>
+                  Identity & Emergency Contact
+                </Text>
+                <Text style={styles.docSubtitle}>
+                  Aadhaar & next-of-kin contact verified
                 </Text>
               </View>
               <Pill
-                label={isNeedsCorrection ? 'Needs Action' : 'Cleared'}
-                tone={isNeedsCorrection ? 'danger' : 'green'}
+                label={
+                  isPending
+                    ? "Under Review"
+                    : verifiedDocs.identity
+                      ? "Cleared"
+                      : "Pending"
+                }
+                tone={
+                  isPending
+                    ? "yellow"
+                    : verifiedDocs.identity
+                      ? "green"
+                      : "neutral"
+                }
               />
             </View>
 
             <View style={styles.docDivider} />
 
             <View style={styles.docItem}>
-              <Text style={styles.checkIcon}>{verifiedDocs.vehicle ? '✓' : '⏳'}</Text>
+              <Text
+                style={[
+                  styles.checkIcon,
+                  isNeedsCorrection && styles.checkError,
+                ]}
+              >
+                {isNeedsCorrection
+                  ? "⚠️"
+                  : isPending
+                    ? "⏳"
+                    : verifiedDocs.licence
+                      ? "✓"
+                      : "⏳"}
+              </Text>
               <View style={styles.docInfo}>
-                <Text style={styles.docTitle}>Vehicle Compliance (RC & PUC)</Text>
-                <Text style={styles.docSubtitle}>Two-wheeler EV / Petrol fitness checked</Text>
+                <Text style={styles.docTitle}>Driving Licence (MCWG)</Text>
+                <Text
+                  style={[
+                    styles.docSubtitle,
+                    isNeedsCorrection && styles.errorSub,
+                  ]}
+                >
+                  {isNeedsCorrection
+                    ? "Front photo blurry. Re-upload needed."
+                    : "Active validity until 2035"}
+                </Text>
               </View>
-              <Pill label={verifiedDocs.vehicle ? 'Cleared' : 'Pending'} tone={verifiedDocs.vehicle ? 'green' : 'neutral'} />
+              <Pill
+                label={
+                  isNeedsCorrection
+                    ? "Needs Action"
+                    : isPending
+                      ? "Under Review"
+                      : "Cleared"
+                }
+                tone={
+                  isNeedsCorrection ? "danger" : isPending ? "yellow" : "green"
+                }
+              />
             </View>
 
             <View style={styles.docDivider} />
 
             <View style={styles.docItem}>
-              <Text style={styles.checkIcon}>{verifiedDocs.bank ? '✓' : '⏳'}</Text>
+              <Text style={styles.checkIcon}>
+                {isPending ? "⏳" : verifiedDocs.vehicle ? "✓" : "⏳"}
+              </Text>
+              <View style={styles.docInfo}>
+                <Text style={styles.docTitle}>
+                  Vehicle Compliance (RC & PUC)
+                </Text>
+                <Text style={styles.docSubtitle}>
+                  Two-wheeler EV / Petrol fitness checked
+                </Text>
+              </View>
+              <Pill
+                label={
+                  isPending
+                    ? "Under Review"
+                    : verifiedDocs.vehicle
+                      ? "Cleared"
+                      : "Pending"
+                }
+                tone={
+                  isPending
+                    ? "yellow"
+                    : verifiedDocs.vehicle
+                      ? "green"
+                      : "neutral"
+                }
+              />
+            </View>
+
+            <View style={styles.docDivider} />
+
+            <View style={styles.docItem}>
+              <Text style={styles.checkIcon}>
+                {isPending ? "⏳" : verifiedDocs.bank ? "✓" : "⏳"}
+              </Text>
               <View style={styles.docInfo}>
                 <Text style={styles.docTitle}>Payout Account (Bank / UPI)</Text>
-                <Text style={styles.docSubtitle}>Direct daily deposit configuration active</Text>
+                <Text style={styles.docSubtitle}>
+                  Direct daily deposit configuration active
+                </Text>
               </View>
-              <Pill label={verifiedDocs.bank ? 'Cleared' : 'Pending'} tone={verifiedDocs.bank ? 'green' : 'neutral'} />
+              <Pill
+                label={
+                  isPending
+                    ? "Under Review"
+                    : verifiedDocs.bank
+                      ? "Cleared"
+                      : "Pending"
+                }
+                tone={
+                  isPending ? "yellow" : verifiedDocs.bank ? "green" : "neutral"
+                }
+              />
             </View>
           </View>
         </Card>
@@ -172,18 +261,15 @@ export default function VerificationStatusScreen() {
             />
           ) : (
             <PrimaryButton
-              title="Simulate Immediate Hub Approval →"
-              onPress={() => {
-                handleSwitchStatus('APPROVED');
-                router.replace('/(tabs)');
-              }}
+              title="Back to Rider Dashboard →"
+              onPress={handleProceed}
               style={styles.mainBtn}
             />
           )}
 
           <SecondaryButton
             title="Review All Uploaded Documents"
-            onPress={() => router.push('/(onboarding)/review')}
+            onPress={() => router.push("/(onboarding)/review")}
             variant="outline"
             style={styles.reviewBtn}
           />
@@ -213,17 +299,17 @@ const styles = StyleSheet.create({
   simLabel: {
     ...typography.caption,
     color: colors.brandYellow,
-    fontWeight: '700',
+    fontWeight: "700",
     marginBottom: spacing.xs,
   },
   simPills: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: spacing.xs + 2,
-    flexWrap: 'wrap',
+    flexWrap: "wrap",
   },
   heroCard: {
     padding: spacing.lg,
-    alignItems: 'center',
+    alignItems: "center",
     marginBottom: spacing.lg,
   },
   badgeWrapper: {
@@ -232,17 +318,17 @@ const styles = StyleSheet.create({
   statusTitle: {
     ...typography.h2,
     color: colors.textPrimary,
-    textAlign: 'center',
+    textAlign: "center",
   },
   statusDescription: {
     ...typography.body2,
     color: colors.textSecondary,
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: spacing.xs + 2,
     lineHeight: 20,
   },
   docsList: {
-    width: '100%',
+    width: "100%",
     marginTop: spacing.lg,
     paddingTop: spacing.md,
     borderTopWidth: 1,
@@ -250,14 +336,14 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   docItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: spacing.sm,
   },
   checkIcon: {
     color: colors.success,
     fontSize: 16,
-    fontWeight: '800',
+    fontWeight: "800",
   },
   checkError: {
     color: colors.danger,
@@ -286,9 +372,9 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   mainBtn: {
-    width: '100%',
+    width: "100%",
   },
   reviewBtn: {
-    width: '100%',
+    width: "100%",
   },
 });

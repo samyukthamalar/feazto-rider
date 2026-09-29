@@ -18,22 +18,33 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { FoodBoxIllustration } from '../src/components/brand/RiderIllustration';
 import { PrimaryButton } from '../src/components/common/PrimaryButton';
 import { SecondaryButton } from '../src/components/common/SecondaryButton';
-import { WorkflowBar } from '../src/components/common/WorkflowBar';
 import { colors } from '../src/constants/colors';
 import { spacing } from '../src/constants/spacing';
 import { typography } from '../src/constants/typography';
+import { orderService } from '../services';
 import { useUIStore } from '../src/store/uiStore';
+
+import { useOrderStore } from '../src/store/orderStore';
 
 export default function ConfirmDeliveryScreen() {
   const router = useRouter();
   const showToast = useUIStore((state) => state.showToast);
-  const [confirmed, setConfirmed] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleConfirm = () => {
-    setConfirmed(true);
-    showToast('Package integrity verified ✓ Handing over to customer.', 'success');
-    router.push('/deliver-customer' as any);
+  const handleConfirm = async () => {
+    try {
+      setLoading(true);
+      await orderService.confirmHandoverPhoto('2FS28734');
+      useOrderStore.getState().advanceStage();
+      showToast('Package integrity verified ✓ Handing over to customer.', 'success');
+      router.push('/deliver-customer' as any);
+    } catch {
+      router.push('/deliver-customer' as any);
+    } finally {
+      setLoading(false);
+    }
   };
+
 
   const handleRetake = () => {
     showToast('Retake preview refreshed', 'info');
@@ -41,8 +52,6 @@ export default function ConfirmDeliveryScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <WorkflowBar currentStep={14} />
-
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => router.back()} hitSlop={8}>
@@ -70,8 +79,9 @@ export default function ConfirmDeliveryScreen() {
         {/* Buttons */}
         <View style={styles.actionsContainer}>
           <PrimaryButton
-            title="Confirm"
+            title={loading ? "Verifying..." : "Confirm"}
             onPress={handleConfirm}
+            loading={loading}
             style={styles.confirmBtn}
           />
 

@@ -151,7 +151,7 @@ export const ResponsiveShell: React.FC<ResponsiveShellProps> = ({ children, styl
           {
             flex: 1,
             width: '100%',
-            backgroundColor: '#050505',
+            backgroundColor: '#F3F4F6',
             alignItems: 'center',
             justifyContent: 'center',
           },
@@ -163,10 +163,10 @@ export const ResponsiveShell: React.FC<ResponsiveShellProps> = ({ children, styl
             flex: 1,
             width: '100%',
             maxWidth: containerMaxWidth || 480,
-            backgroundColor: '#0B0B0B',
+            backgroundColor: '#FFFFFF',
             shadowColor: '#000',
             shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.5,
+            shadowOpacity: 0.1,
             shadowRadius: 16,
             elevation: 10,
           }}

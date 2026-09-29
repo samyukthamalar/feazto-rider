@@ -5,8 +5,8 @@
  */
 
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import React, { useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import React, { useCallback, useState } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -15,7 +15,6 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { WorkflowBar } from '../../src/components/common/WorkflowBar';
 import { colors } from '../../src/constants/colors';
 import { spacing } from '../../src/constants/spacing';
 import { typography } from '../../src/constants/typography';
@@ -44,14 +43,43 @@ const historyData = [
   },
 ];
 
+import { orderService } from '../../services';
+
 export default function OrderHistoryScreen() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'Today' | 'Week' | 'Month'>('Today');
+  const [orders, setOrders] = useState<any[]>(historyData);
+  const [loading, setLoading] = useState(false);
+
+  const loadHistory = useCallback(async () => {
+    try {
+      setLoading(true);
+      const data = await orderService.getOrderHistory(activeTab.toLowerCase() as any);
+      if (data && data.length > 0) {
+        const formatted = data.map((item: any) => ({
+          id: item.orderNumber || `#${item.id}`,
+          time: item.time,
+          status: item.status,
+          amount: `₹${item.amount}`,
+          items: `${item.itemsCount} ${item.itemsCount === 1 ? 'Item' : 'Items'} • ${item.restaurant}`,
+        }));
+        setOrders(formatted);
+      }
+    } catch (err) {
+      // keep fallback
+    } finally {
+      setLoading(false);
+    }
+  }, [activeTab]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadHistory();
+    }, [loadHistory])
+  );
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <WorkflowBar currentStep={17} />
-
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.headerTitle}>Order History</Text>
@@ -78,7 +106,7 @@ export default function OrderHistoryScreen() {
 
         {/* Order History Cards */}
         <View style={styles.list}>
-          {historyData.map((order) => (
+          {orders.map((order) => (
             <View key={order.id} style={styles.orderCard}>
               <View style={styles.cardLeft}>
                 <View style={styles.orderIconCircle}>

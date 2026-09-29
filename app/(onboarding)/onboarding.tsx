@@ -9,25 +9,26 @@ import { useRouter } from "expo-router";
 import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { PrimaryButton } from "../../src/components/common/PrimaryButton";
-import { WorkflowBar } from "../../src/components/common/WorkflowBar";
 import { colors } from "../../src/constants/colors";
 import { spacing } from "../../src/constants/spacing";
 import { typography } from "../../src/constants/typography";
 import { useAuthStore } from "../../src/store/authStore";
+import { useRiderStore } from "../../src/store/riderStore";
+import { riderService } from "../../services";
 
 export default function OnboardingScreen() {
   const router = useRouter();
   const setIsOnboarded = useAuthStore((state) => state.setIsOnboarded);
 
-  const handleGetStarted = () => {
+  const handleGetStarted = async () => {
     setIsOnboarded(true);
+    useRiderStore.getState().goOffline();
+    await riderService.updateDutyStatus(false);
     router.replace("/(tabs)" as any);
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <WorkflowBar currentStep={5} />
-
       <View style={styles.container}>
         <View style={styles.centerContent}>
           {/* Avatar Icon with Verification Badge */}

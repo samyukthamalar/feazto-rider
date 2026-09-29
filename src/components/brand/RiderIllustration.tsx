@@ -148,9 +148,29 @@ export const FoodBoxIllustration: React.FC<{ size?: number }> = ({
 /**
  * 4. Map Route Simulation Graphic (Screen 11)
  */
-export const MapRouteGraphic: React.FC<{ height?: number }> = ({
+export const MapRouteGraphic: React.FC<{ height?: number; progress?: number }> = ({
   height = 260,
+  progress = 0,
 }) => {
+  // Calculate marker coordinate based on route progress (0 to 1)
+  const clampedProgress = Math.min(Math.max(progress, 0), 1);
+  let markerBottom = 30;
+  let markerLeft = 68;
+
+  if (clampedProgress <= 0.4) {
+    const p = clampedProgress / 0.4;
+    markerBottom = 30 + p * 110;
+    markerLeft = 68;
+  } else if (clampedProgress <= 0.8) {
+    const p = (clampedProgress - 0.4) / 0.4;
+    markerBottom = 140;
+    markerLeft = 68 + p * 134;
+  } else {
+    const p = (clampedProgress - 0.8) / 0.2;
+    markerBottom = 140 + p * 80;
+    markerLeft = 202;
+  }
+
   return (
     <View style={[styles.mapContainer, { height }]}>
       {/* Background streets */}
@@ -176,8 +196,8 @@ export const MapRouteGraphic: React.FC<{ height?: number }> = ({
         <View style={styles.destDot} />
       </View>
 
-      {/* Moving Rider Marker */}
-      <View style={styles.riderMarker}>
+      {/* Moving Rider Marker following progress along polyline */}
+      <View style={[styles.riderMarker, { bottom: markerBottom, left: markerLeft }]}>
         <View style={styles.markerCircle}>
           <Ionicons name="bicycle" size={20} color="#111827" />
         </View>
@@ -186,6 +206,7 @@ export const MapRouteGraphic: React.FC<{ height?: number }> = ({
     </View>
   );
 };
+
 
 /**
  * 5. Celebration Gold Star / Trophy (Screen 16)

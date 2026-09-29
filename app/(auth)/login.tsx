@@ -20,12 +20,12 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ScooterRiderIllustration } from '../../src/components/brand/RiderIllustration';
 import { InputField } from '../../src/components/common/InputField';
 import { PrimaryButton } from '../../src/components/common/PrimaryButton';
-import { WorkflowBar } from '../../src/components/common/WorkflowBar';
 import { colors } from '../../src/constants/colors';
 import { spacing } from '../../src/constants/spacing';
 import { typography } from '../../src/constants/typography';
 import { useAuthStore } from '../../src/store/authStore';
 import { useUIStore } from '../../src/store/uiStore';
+import { authService } from '../../services/authService';
 
 export default function LoginScreen() {
   const router = useRouter();
@@ -33,23 +33,35 @@ export default function LoginScreen() {
   const showToast = useUIStore((state) => state.showToast);
 
   const [phoneNumber, setPhoneNumber] = useState('9876543210');
-  const [password, setPassword] = useState('••••••••');
+  const [password, setPassword] = useState('1234');
   const [isSignUp, setIsSignUp] = useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = () => {
-    if (!phoneNumber) {
-      showToast('Please enter your phone number', 'warning');
+  const handleLogin = async () => {
+    if (!phoneNumber || phoneNumber.trim().length < 10) {
+      showToast('Please enter a valid 10-digit mobile number', 'warning');
       return;
     }
-    setPhone(phoneNumber);
-    showToast(isSignUp ? 'Account created! Proceeding to document verification.' : 'Welcome back! Please verify your documents.', 'success');
-    router.push('/(auth)/document-auth' as any);
+    setLoading(true);
+    const res = await authService.login(phoneNumber, password);
+    setLoading(false);
+
+    if (res.success) {
+      setPhone(phoneNumber);
+      showToast(
+        isSignUp
+          ? 'Account created! Proceeding to document verification.'
+          : 'Login verified ✓ Welcome back, Karthik!',
+        'success'
+      );
+      router.push('/(auth)/document-auth' as any);
+    } else {
+      showToast(res.error || 'Authentication failed', 'error');
+    }
   };
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <WorkflowBar currentStep={2} />
-
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.keyboardView}
@@ -92,6 +104,7 @@ export default function LoginScreen() {
             <PrimaryButton
               title={isSignUp ? 'Sign Up' : 'Login'}
               onPress={handleLogin}
+              loading={loading}
               style={styles.loginBtn}
             />
 

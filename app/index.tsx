@@ -9,7 +9,6 @@ import { StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { ScooterRiderIllustration } from "../src/components/brand/RiderIllustration";
 import { PrimaryButton } from "../src/components/common/PrimaryButton";
-import { WorkflowBar } from "../src/components/common/WorkflowBar";
 import { colors } from "../src/constants/colors";
 import { useResponsive } from "../src/utils/responsive";
 
@@ -19,7 +18,6 @@ export default function SplashScreen() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <WorkflowBar currentStep={1} />
       <View style={styles.container}>
         <View style={[styles.content, { paddingTop: hp(10) }]}>
           {/* Logo & Branding */}
