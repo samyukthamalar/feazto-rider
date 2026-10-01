@@ -109,15 +109,16 @@ export default function LoginScreen() {
             />
 
             <TouchableOpacity
-              onPress={() => setIsSignUp(!isSignUp)}
+              onPress={() => router.push('/(auth)/sign-up' as any)}
               style={styles.switchRow}
             >
               <Text style={styles.switchText}>
-                {isSignUp ? 'Already have an account? ' : "Don't have an account? "}
-                <Text style={styles.switchLink}>{isSignUp ? 'Login' : 'Sign Up'}</Text>
+                Don't have an account?{' '}
+                <Text style={styles.switchLink}>Sign Up</Text>
               </Text>
             </TouchableOpacity>
           </View>
+
 
           {/* Illustration at bottom matching reference diagram */}
           <View style={styles.illustrationWrapper}>

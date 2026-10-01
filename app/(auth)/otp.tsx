@@ -26,6 +26,8 @@ import { borderRadius, spacing } from '../../src/constants/spacing';
 import { typography } from '../../src/constants/typography';
 import { useAuthStore } from '../../src/store/authStore';
 import { useUIStore } from '../../src/store/uiStore';
+import { registrationService } from '../../services/registrationService';
+
 
 export default function OtpScreen() {
   const router = useRouter();
@@ -59,12 +61,14 @@ export default function OtpScreen() {
 
     const result = await verifyOtp(code);
     if (result.success) {
-      showToast('Identity verified successfully!', 'success');
-      router.replace('/(auth)/verification-status');
+      await registrationService.markOtpVerified();
+      showToast('Mobile number verified ✓ Proceeding to Document Authentication.', 'success');
+      router.replace('/(auth)/document-auth' as any);
     } else {
       setError(result.error || 'Verification failed. Try entering 1234 for demo.');
     }
   };
+
 
   const handleResend = async () => {
     if (timer > 0) return;

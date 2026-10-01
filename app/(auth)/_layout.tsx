@@ -14,9 +14,14 @@ export default function AuthLayout() {
         contentStyle: { backgroundColor: colors.background },
       }}
     >
-      <Stack.Screen name="sign-in" />
+      <Stack.Screen name="login" />
+      <Stack.Screen name="sign-up" />
       <Stack.Screen name="otp" />
+      <Stack.Screen name="document-auth" />
+      <Stack.Screen name="verification-process" />
       <Stack.Screen name="verification-status" />
+      <Stack.Screen name="sign-in" />
     </Stack>
+
   );
 }
